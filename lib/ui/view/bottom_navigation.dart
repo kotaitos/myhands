@@ -25,10 +25,6 @@ class _ButtomNavigationBarState extends State<ButtomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("myhands"),
-        automaticallyImplyLeading: false,
-      ),
       body: _pageWidgets.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
