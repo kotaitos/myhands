@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     if (FirebaseAuth.instance.currentUser != null &&
         FirebaseAuth.instance.currentUser!.emailVerified) {
       return MaterialApp(
-        title: 'allergy',
+        title: 'myhands',
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         home: ButtomNavigationBar(),
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       );
     } else {
       return MaterialApp(
-        title: 'allergy',
+        title: 'myhands',
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         home: SigninScreen(),
