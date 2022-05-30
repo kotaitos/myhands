@@ -207,6 +207,84 @@ abstract class L10n {
   /// In ja, this message translates to:
   /// **'パスワードは8文字以上です。'**
   String get ui__signup__password_is_not__8_or_more_characters;
+
+  /// No description provided for @ui__home__your_post.
+  ///
+  /// In ja, this message translates to:
+  /// **'あなたの投稿'**
+  String get ui__home__your_post;
+
+  /// No description provided for @ui__home__new.
+  ///
+  /// In ja, this message translates to:
+  /// **'new'**
+  String get ui__home__new;
+
+  /// No description provided for @ui__view__edit__app_bar_title.
+  ///
+  /// In ja, this message translates to:
+  /// **'新規作成'**
+  String get ui__view__edit__app_bar_title;
+
+  /// No description provided for @ui__view__edit__saved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get ui__view__edit__saved;
+
+  /// No description provided for @ui__view__edit__title.
+  ///
+  /// In ja, this message translates to:
+  /// **'タイトル'**
+  String get ui__view__edit__title;
+
+  /// No description provided for @ui__view__edit__description.
+  ///
+  /// In ja, this message translates to:
+  /// **'概要'**
+  String get ui__view__edit__description;
+
+  /// No description provided for @ui__view__edit__hero.
+  ///
+  /// In ja, this message translates to:
+  /// **'ハンド'**
+  String get ui__view__edit__hero;
+
+  /// No description provided for @ui__view__edit__frop.
+  ///
+  /// In ja, this message translates to:
+  /// **'フロップ'**
+  String get ui__view__edit__frop;
+
+  /// No description provided for @ui__view__edit__turn.
+  ///
+  /// In ja, this message translates to:
+  /// **'ターン'**
+  String get ui__view__edit__turn;
+
+  /// No description provided for @ui__view__edit__river.
+  ///
+  /// In ja, this message translates to:
+  /// **'リバー'**
+  String get ui__view__edit__river;
+
+  /// No description provided for @ui__view__edit__memo.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ'**
+  String get ui__view__edit__memo;
+
+  /// No description provided for @ui__component__set_card_dialog__title.
+  ///
+  /// In ja, this message translates to:
+  /// **'カードの種類'**
+  String get ui__component__set_card_dialog__title;
+
+  /// No description provided for @ui__component__set_card_dialog__clear.
+  ///
+  /// In ja, this message translates to:
+  /// **'クリア'**
+  String get ui__component__set_card_dialog__clear;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

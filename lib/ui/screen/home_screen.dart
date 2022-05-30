@@ -33,10 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 width: double.infinity,
                 child: Row(children: [
-                  const Text(
-                    'あなたの投稿',
+                  Text(
+                    l10n.ui__home__your_post,
                     textAlign: TextAlign.left,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 36,
                       color: Colors.black54,
                       fontWeight: FontWeight.bold,
@@ -47,14 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (BuildContext context) {
-                          return Edit(mode: 'create',);
+                          return const Edit(mode: 'create',);
                         },
                       ))
                       .then((value) {
                         setState(() {});
                       });
                     },
-                    label: const Text('new'),
+                    label: Text(l10n.ui__home__new),
                     icon: const Icon(Icons.add),
                   )
                 ]),

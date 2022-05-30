@@ -1,23 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:myhands/l10n/l10n.dart';
 import 'package:myhands/model/Post.dart';
+import 'package:myhands/model/TrumpCard.dart';
+import 'package:myhands/res/Spot.dart';
 import 'package:myhands/service/firestore.dart';
 import 'package:myhands/ui/component/overlay_loading.dart';
-import 'package:myhands/ui/component/trump_card.dart';
+import 'package:myhands/ui/component/trump_card_row.dart';
 
 class Edit extends StatefulWidget {
   final String mode;
-  Edit({Key? key, required this.mode}) : super(key: key);
+  const Edit({Key? key, required this.mode}) : super(key: key);
   @override
   _EditState createState() => _EditState();
 }
 
 class _EditState extends State<Edit> {
   static final String _uid = FirebaseAuth.instance.currentUser?.uid.toString() ?? 'ログインユーザー名取得失敗';
-      
-  static final List<String> ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"];
-  static final List<String> suit = ["spade", "heart", "diamond", "club"];
-
 
   static Post post = Post();
 
@@ -35,8 +34,8 @@ class _EditState extends State<Edit> {
           "",
           <TrumpCard>[],
           <TrumpCard>[],
-          TrumpCard(rank: "", suit: ""),
-          TrumpCard(rank: "", suit: ""),
+          <TrumpCard>[],
+          <TrumpCard>[],
           "",
           "",
           "",
@@ -44,13 +43,19 @@ class _EditState extends State<Edit> {
       });
       post.uid = _uid;
       post.hero = <TrumpCard>[
-        TrumpCard(rank: "", suit: ""),
-        TrumpCard(rank: "", suit: ""),
+        TrumpCard("", ""),
+        TrumpCard("", ""),
       ];
       post.frop = <TrumpCard>[
-        TrumpCard(rank: "", suit: ""),
-        TrumpCard(rank: "", suit: ""),
-        TrumpCard(rank: "", suit: ""),
+        TrumpCard("", ""),
+        TrumpCard("", ""),
+        TrumpCard("", ""),
+      ];
+      post.turn = <TrumpCard>[
+        TrumpCard("", ""),
+      ];
+      post.river = <TrumpCard>[
+        TrumpCard("", ""),
       ];
 
       setState(() {
@@ -59,11 +64,32 @@ class _EditState extends State<Edit> {
     }
   }
 
+  setCard(String key, int index, TrumpCard card) {
+    if (key == Spot.hero) {
+      setState(() {
+        post.hero[index] = card;
+      });
+    } else if (key == Spot.frop) {
+      setState(() {
+        post.frop[index] = card;
+      });
+    } else if (key == Spot.turn) {
+      setState(() {
+        post.turn[index] = card;
+      });
+    } else if (key == Spot.river) {
+      setState(() {
+        post.river[index] = card;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('新規作成'),
+        title: Text(l10n.ui__view__edit__app_bar_title),
         actions: <Widget>[
           IconButton(
             onPressed: () async {
@@ -78,8 +104,8 @@ class _EditState extends State<Edit> {
                 await showDialog(
                   context: context,
                   builder: (context) {
-                    return const AlertDialog(
-                      title: Text("保存しました"),
+                    return AlertDialog(
+                      title: Text(l10n.ui__view__edit__saved),
                       actions: [],
                     );
                   });
@@ -91,7 +117,7 @@ class _EditState extends State<Edit> {
         ],
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios),
         ),
       ),
       body: Stack(
@@ -103,11 +129,11 @@ class _EditState extends State<Edit> {
               child: Column(
                 children: [
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'タイトル',
+                        l10n.ui__view__edit__title,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -118,7 +144,7 @@ class _EditState extends State<Edit> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
                     child: TextField(
-                      maxLines: 3,
+                      maxLines: 1,
                       minLines: 1,
                       onChanged: (text) {
                         setState(() {
@@ -128,11 +154,11 @@ class _EditState extends State<Edit> {
                     ),
                   ),
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        '概要',
+                        l10n.ui__view__edit__description,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -153,11 +179,11 @@ class _EditState extends State<Edit> {
                     ),
                   ),
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'Your Hand',
+                        l10n.ui__view__edit__hero,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 36,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -165,74 +191,13 @@ class _EditState extends State<Edit> {
                       ),
                     ],
                   ),
+                  TrumpCardRow(spot: Spot.hero, cards: post.hero, callback: setCard),
                   Row(
                     children: [
-                      for (int i = 0; i < post.hero.length; ++i)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                          child: GestureDetector(
-                            onTap: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return WillPopScope(
-                                    onWillPop: () async {
-                                      setState(() {});
-                                      return true;
-                                    },
-                                    child: AlertDialog(
-                                      title: const Text("カードの種類"),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              post.hero[i] = TrumpCard(rank: "", suit: "");
-                                            });
-                                          },
-                                          child: const Text('クリア')
-                                        )
-                                      ],
-                                      content: SingleChildScrollView(
-                                        child: Column(children: <Widget>[
-                                          Row(children: [
-                                            for (int j = 0; j < suit.length; j++)
-                                              Padding(
-                                                padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                                                child: GestureDetector(
-                                                  child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
-                                                  onTap: (){
-                                                    setState(() {post.hero[i] = TrumpCard(rank: post.hero[i].rank, suit: suit[j]);});
-                                                  },
-                                                ),
-                                              )
-                                          ],),
-                                          Wrap(children: [
-                                            for (int k = 0; k < ranks.length; k++)
-                                              Padding(
-                                                padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
-                                                child: TextButton(
-                                                  child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                                                  onPressed: (){
-                                                    setState(() {post.hero[i] = TrumpCard(rank: ranks[k], suit: post.hero[i].suit);});
-                                                  },
-                                                ),
-                                              )
-                                          ],)
-                                      ],) 
-                                    ))
-                                  );
-                                });
-                            },
-                            child: post.hero[i],
-                          ),
-                        ),
-                    ],),
-                  Row(
-                    children: const [
                       Text(
-                        'メモ',
+                        l10n.ui__view__edit__memo,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -254,11 +219,11 @@ class _EditState extends State<Edit> {
                   ),
                   
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'Frop',
+                        l10n.ui__view__edit__frop,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 36,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -266,74 +231,13 @@ class _EditState extends State<Edit> {
                       ),
                     ],
                   ),
+                  TrumpCardRow(spot: Spot.frop, cards: post.frop, callback: setCard),
                   Row(
                     children: [
-                      for (int i = 0; i < post.frop.length; ++i)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                          child: GestureDetector(
-                            onTap: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return WillPopScope(
-                                    onWillPop: () async {
-                                      setState(() {});
-                                      return true;
-                                    },
-                                    child: AlertDialog(
-                                      title: const Text("カードの種類"),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              post.frop[i] = TrumpCard(rank: "", suit: "");
-                                            });
-                                          },
-                                          child: const Text('クリア')
-                                        )
-                                      ],
-                                      content: SingleChildScrollView(
-                                        child: Column(children: <Widget>[
-                                          Row(children: [
-                                            for (int j = 0; j < suit.length; j++)
-                                              Padding(
-                                                padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                                                child: GestureDetector(
-                                                  child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
-                                                  onTap: (){
-                                                    setState(() {post.frop[i] = TrumpCard(rank: post.frop[i].rank, suit: suit[j]);});
-                                                  },
-                                                ),
-                                              )
-                                          ],),
-                                          Wrap(children: [
-                                            for (int k = 0; k < ranks.length; k++)
-                                              Padding(
-                                                padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
-                                                child: TextButton(
-                                                  child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                                                  onPressed: (){
-                                                    setState(() { post.frop[i] = TrumpCard(rank: ranks[k], suit: post.frop[i].suit);});
-                                                  },
-                                                ),
-                                              )
-                                          ],)
-                                      ],) 
-                                    ))
-                                  );
-                                });
-                            },
-                            child: post.frop[i],
-                          ),
-                        )
-                    ],),
-                  Row(
-                    children: const [
                       Text(
-                        'メモ',
+                        l10n.ui__view__edit__memo,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -355,11 +259,11 @@ class _EditState extends State<Edit> {
                   ),
                   
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'Turn',
+                        l10n.ui__view__edit__turn,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 36,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -367,73 +271,13 @@ class _EditState extends State<Edit> {
                       ),
                     ],
                   ),
+                  TrumpCardRow(spot: Spot.turn, cards: post.turn, callback: setCard),
                   Row(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                        child: GestureDetector(
-                          onTap: () async {
-                            await showDialog(
-                              context: context,
-                              builder: (context) {
-                                return WillPopScope(
-                                  onWillPop: () async {
-                                    setState(() {});
-                                    return true;
-                                  },
-                                  child: AlertDialog(
-                                    title: const Text("カードの種類"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            post.turn = TrumpCard(rank: "", suit: "");
-                                          });
-                                        },
-                                        child: const Text('クリア')
-                                      )
-                                    ],
-                                    content: SingleChildScrollView(
-                                      child: Column(children: <Widget>[
-                                        Row(children: [
-                                          for (int j = 0; j < suit.length; j++)
-                                            Padding(
-                                              padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                                              child: GestureDetector(
-                                                child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
-                                                onTap: (){
-                                                  setState(() {post.turn = TrumpCard(rank: post.turn.rank, suit: suit[j]);});
-                                                },
-                                              ),
-                                            )
-                                        ],),
-                                        Wrap(children: [
-                                          for (int k = 0; k < ranks.length; k++)
-                                            Padding(
-                                              padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
-                                              child: TextButton(
-                                                child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                                                onPressed: (){
-                                                  setState(() { post.turn = TrumpCard(rank: ranks[k], suit: post.turn.suit);});
-                                                },
-                                              ),
-                                            )
-                                        ],)
-                                    ],) 
-                                  ))
-                                );
-                              });
-                          },
-                          child: post.turn,
-                        ),
-                      )
-                    ],),
-                  Row(
-                    children: const [
                       Text(
-                        'メモ',
+                        l10n.ui__view__edit__memo,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -455,11 +299,11 @@ class _EditState extends State<Edit> {
                   ),
 
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'River',
+                        l10n.ui__view__edit__river,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 36,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -467,73 +311,13 @@ class _EditState extends State<Edit> {
                       ),
                     ],
                   ),
+                  TrumpCardRow(spot: Spot.river, cards: post.river, callback: setCard),
                   Row(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                        child: GestureDetector(
-                          onTap: () async {
-                            await showDialog(
-                              context: context,
-                              builder: (context) {
-                                return WillPopScope(
-                                  onWillPop: () async {
-                                    setState(() {});
-                                    return true;
-                                  },
-                                  child: AlertDialog(
-                                    title: const Text("カードの種類"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            post.river = TrumpCard(rank: "", suit: "");
-                                          });
-                                        },
-                                        child: const Text('クリア')
-                                      )
-                                    ],
-                                    content: SingleChildScrollView(
-                                      child: Column(children: <Widget>[
-                                        Row(children: [
-                                          for (int j = 0; j < suit.length; j++)
-                                            Padding(
-                                              padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                                              child: GestureDetector(
-                                                child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
-                                                onTap: (){
-                                                  setState(() {post.river = TrumpCard(rank: post.river.rank, suit: suit[j]);});
-                                                },
-                                              ),
-                                            )
-                                        ],),
-                                        Wrap(children: [
-                                          for (int k = 0; k < ranks.length; k++)
-                                            Padding(
-                                              padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
-                                              child: TextButton(
-                                                child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                                                onPressed: (){
-                                                  setState(() { post.river = TrumpCard(rank: ranks[k], suit: post.river.suit);});
-                                                },
-                                              ),
-                                            )
-                                        ],)
-                                    ],) 
-                                  ))
-                                );
-                              });
-                          },
-                          child: post.river,
-                        ),
-                      )
-                    ],),
-                  Row(
-                    children: const [
                       Text(
-                        'メモ',
+                        l10n.ui__view__edit__memo,
                         textAlign: TextAlign.left,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,
