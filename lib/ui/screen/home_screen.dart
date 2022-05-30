@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                     label: const Text('new'),
-                    icon: const Icon(Icons.edit),
+                    icon: const Icon(Icons.add),
                   )
                 ]),
               ),
