@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:myhands/ui/screen/home_screen.dart';
 import 'package:myhands/ui/screen/account_screen.dart';
 
-class ButtomNavigationBar extends StatefulWidget {
-  const ButtomNavigationBar({Key? key}) : super(key: key);
+class BottomNavigationBarView extends StatefulWidget {
+  const BottomNavigationBarView({Key? key}) : super(key: key);
 
   @override
-  State<ButtomNavigationBar> createState() => _ButtomNavigationBarState();
+  State<BottomNavigationBarView> createState() => _BottomNavigationBarViewState();
 }
 
-class _ButtomNavigationBarState extends State<ButtomNavigationBar> {
+class _BottomNavigationBarViewState extends State<BottomNavigationBarView> {
   int _selectedIndex = 0;
   final _pageWidgets = [
     HomeScreen(),

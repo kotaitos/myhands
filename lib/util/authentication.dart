@@ -27,7 +27,7 @@ class Authentication {
     if (user != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => ButtomNavigationBar(),
+          builder: (context) => BottomNavigationBarView(),
         ),
       );
     }

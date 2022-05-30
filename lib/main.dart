@@ -20,24 +20,24 @@ class MyApp extends StatelessWidget {
     if (FirebaseAuth.instance.currentUser != null &&
         FirebaseAuth.instance.currentUser!.emailVerified) {
       return MaterialApp(
-        title: 'allergy',
+        title: 'myhands',
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
-        home: ButtomNavigationBar(),
+        home: BottomNavigationBarView(),
         routes: <String, WidgetBuilder>{
           '/signin': (_) => SigninScreen(),
-          '/home': (_) => ButtomNavigationBar(),
+          '/home': (_) => BottomNavigationBarView(),
         },
       );
     } else {
       return MaterialApp(
-        title: 'allergy',
+        title: 'myhands',
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         home: SigninScreen(),
         routes: <String, WidgetBuilder>{
           '/signin': (_) => SigninScreen(),
-          '/home': (_) => ButtomNavigationBar(),
+          '/home': (_) => BottomNavigationBarView(),
         },
       );
     }

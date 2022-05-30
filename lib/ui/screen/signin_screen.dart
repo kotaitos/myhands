@@ -118,7 +118,7 @@ class _SigninScreen extends State<SigninScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ButtomNavigationBar(),
+                            builder: (context) => BottomNavigationBarView(),
                           ));
                     } else {
                       Navigator.push(

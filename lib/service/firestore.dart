@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:myhands/model/User.dart';
 import 'package:myhands/model/Profile.dart';
 import 'package:myhands/model/Post.dart';
 
@@ -10,7 +9,27 @@ class FirestoreService {
     .doc(uid)
     .get();
 
-    Profile profile = Profile(profileSnapshot['uid'], profileSnapshot['username'], profileSnapshot['nickname'], profileSnapshot['profile'], profileSnapshot['birthday'].toDate());
+    Profile profile = Profile.fromMap(profileSnapshot.data());
     return profile;
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getPostStream(String uid) {
+    final postCollectionSnapshots = FirebaseFirestore.instance
+    .collection('users')
+    .doc(uid)
+    .collection('posts')
+    .snapshots();
+    return postCollectionSnapshots;
+  }
+
+  static createPost(Post post) async {
+    DocumentReference<Map<String, dynamic>> document = await FirebaseFirestore.instance
+    .collection('users')
+    .doc(post.uid)
+    .collection('posts')
+    .doc();
+
+    post.post_id = document.id;
+    document.set(post.toMap());
   }
 }
