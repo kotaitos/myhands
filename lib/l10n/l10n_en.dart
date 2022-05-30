@@ -63,4 +63,43 @@ class L10nEn extends L10n {
 
   @override
   String get ui__signup__password_is_not__8_or_more_characters => 'Password must be at least 8 characters.';
+
+  @override
+  String get ui__home__your_post => 'あなたの投稿';
+
+  @override
+  String get ui__home__new => 'new';
+
+  @override
+  String get ui__view__edit__app_bar_title => '新規作成';
+
+  @override
+  String get ui__view__edit__saved => '保存しました';
+
+  @override
+  String get ui__view__edit__title => 'タイトル';
+
+  @override
+  String get ui__view__edit__description => '概要';
+
+  @override
+  String get ui__view__edit__hero => 'ハンド';
+
+  @override
+  String get ui__view__edit__frop => 'フロップ';
+
+  @override
+  String get ui__view__edit__turn => 'ターン';
+
+  @override
+  String get ui__view__edit__river => 'リバー';
+
+  @override
+  String get ui__view__edit__memo => 'メモ';
+
+  @override
+  String get ui__component__set_card_dialog__title => 'カードの種類';
+
+  @override
+  String get ui__component__set_card_dialog__clear => 'クリア';
 }

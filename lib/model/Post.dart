@@ -1,6 +1,6 @@
 import 'package:myhands/model/PostField.dart';
-import 'package:myhands/model/CardField.dart';
-import 'package:myhands/ui/component/trump_card.dart';
+import 'package:myhands/model/TrumpCard.dart';
+import 'package:myhands/model/TrumpCardField.dart';
 
 class Post {
   String uid = "";
@@ -9,16 +9,20 @@ class Post {
   String title = "";
   String description = "";
   List<TrumpCard> hero = <TrumpCard>[
-    TrumpCard(rank: "", suit: ""),
-    TrumpCard(rank: "", suit: ""),
+    TrumpCard("", ""),
+    TrumpCard("", ""),
   ];
   List<TrumpCard> frop = <TrumpCard>[
-    TrumpCard(rank: "", suit: ""),
-    TrumpCard(rank: "", suit: ""),
-    TrumpCard(rank: "", suit: ""),
+    TrumpCard("", ""),
+    TrumpCard("", ""),
+    TrumpCard("", ""),
   ];
-  TrumpCard turn = TrumpCard(rank: "", suit: "");
-  TrumpCard river = TrumpCard(rank: "", suit: "");
+  List<TrumpCard> turn = [
+    TrumpCard("", ""),
+  ];
+  List<TrumpCard> river = [
+    TrumpCard("", ""),
+  ];
   String hero_memo = "";
   String frop_memo = "";
   String turn_memo = "";
@@ -33,8 +37,8 @@ class Post {
     String description,
     List<TrumpCard> hero,
     List<TrumpCard> frop,
-    TrumpCard turn,
-    TrumpCard river,
+    List<TrumpCard> turn,
+    List<TrumpCard> river,
     String hero_memo,
     String frop_memo,
     String turn_memo,
@@ -70,18 +74,30 @@ class Post {
       List l = map[PostField.hero];
       hero = [
         for (int i = 0; i < l.length; i++)
-          TrumpCard(rank: l[i][CardField.rank], suit: l[i][CardField.suit])
+          TrumpCard(l[i][TrumpCardField.rank], l[i][TrumpCardField.suit])
       ];
     }
     if (map[PostField.frop] is List) {
       List l = map[PostField.frop];
       frop = [
         for (int i = 0; i < l.length; i++)
-          TrumpCard(rank: l[i][CardField.rank], suit: l[i][CardField.suit])
+          TrumpCard(l[i][TrumpCardField.rank], l[i][TrumpCardField.suit])
       ];
     }
-    turn = TrumpCard(rank: map[PostField.turn][CardField.rank], suit: map[PostField.turn][CardField.suit]);
-    river = TrumpCard(rank: map[PostField.turn][CardField.rank], suit: map[PostField.turn][CardField.suit]);
+    if (map[PostField.turn] is List) {
+      List l = map[PostField.turn];
+      turn = [
+        for (int i = 0; i < l.length; i++)
+          TrumpCard(l[i][TrumpCardField.rank], l[i][TrumpCardField.suit])
+      ];
+    }
+    if (map[PostField.river] is List) {
+      List l = map[PostField.river];
+      river = [
+        for (int i = 0; i < l.length; i++)
+          TrumpCard(l[i][TrumpCardField.rank], l[i][TrumpCardField.suit])
+      ];
+    }
   }
 
   toMap() {
@@ -98,8 +114,14 @@ class Post {
         for (int i = 0; i < frop.length; i++)
           frop[i].toJson()
       ],
-      PostField.turn: turn.toJson(),
-      PostField.river: river.toJson(),
+      PostField.turn: [
+        for (int i = 0; i < turn.length; i++)
+          turn[i].toJson()
+      ],
+      PostField.river: [
+        for (int i = 0; i < river.length; i++)
+          river[i].toJson()
+      ],
       PostField.hero_memo: hero_memo,
       PostField.frop_memo: frop_memo,
       PostField.turn_memo: turn_memo,
