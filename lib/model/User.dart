@@ -1,3 +1,5 @@
+import 'package:myhands/model/UserField.dart';
+
 class User {
   String uid = "";
   String mail = "";
@@ -6,8 +8,8 @@ class User {
 
   toJson() {
     return {
-      "uid": uid,
-      "mail": mail,
+      UserField.uid: uid,
+      UserField.mail: mail,
     };
   }
 }
