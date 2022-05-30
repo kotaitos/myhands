@@ -23,10 +23,10 @@ class MyApp extends StatelessWidget {
         title: 'myhands',
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
-        home: ButtomNavigationBar(),
+        home: BottomNavigationBarView(),
         routes: <String, WidgetBuilder>{
           '/signin': (_) => SigninScreen(),
-          '/home': (_) => ButtomNavigationBar(),
+          '/home': (_) => BottomNavigationBarView(),
         },
       );
     } else {
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         home: SigninScreen(),
         routes: <String, WidgetBuilder>{
           '/signin': (_) => SigninScreen(),
-          '/home': (_) => ButtomNavigationBar(),
+          '/home': (_) => BottomNavigationBarView(),
         },
       );
     }
