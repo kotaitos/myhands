@@ -4,12 +4,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:myhands/ui/view/edit.dart';
 import 'package:myhands/ui/view/post_list.dart';
 
-// [Themelist] インスタンスにおける処理。
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   final String _uid =
       FirebaseAuth.instance.currentUser?.uid.toString() ?? 'ログインユーザー名取得失敗';
 
-  HomeScreen({Key? key}) : super(key: key);
+    final GlobalKey _key = GlobalKey<State<PostList>>();
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                 width: double.infinity,
                 child: Row(children: [
                   const Text(
-                    'あなたのメモ',
+                    'あなたの投稿',
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 36,
@@ -37,11 +47,14 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (BuildContext context) {
-                          return Edit();
+                          return Edit(mode: 'create',);
                         },
-                      ));
+                      ))
+                      .then((value) {
+                        setState(() {});
+                      });
                     },
-                    label: const Text('新規メモ'),
+                    label: const Text('new'),
                     icon: const Icon(Icons.edit),
                   )
                 ]),

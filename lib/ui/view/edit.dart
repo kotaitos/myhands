@@ -2,40 +2,62 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myhands/model/Post.dart';
 import 'package:myhands/service/firestore.dart';
+import 'package:myhands/ui/component/overlay_loading.dart';
 import 'package:myhands/ui/component/trump_card.dart';
 
 class Edit extends StatefulWidget {
+  final String mode;
+  Edit({Key? key, required this.mode}) : super(key: key);
   @override
   _EditState createState() => _EditState();
 }
 
 class _EditState extends State<Edit> {
-  final String _uid = FirebaseAuth.instance.currentUser?.uid.toString() ?? 'ログインユーザー名取得失敗';
+  static final String _uid = FirebaseAuth.instance.currentUser?.uid.toString() ?? 'ログインユーザー名取得失敗';
       
-  final List<String> ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"];
-  final List<String> suit = ["spade", "heart", "diamond", "club"];
+  static final List<String> ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"];
+  static final List<String> suit = ["spade", "heart", "diamond", "club"];
 
-  String _title = "";
-  String _description = "";
 
-  final List<TrumpCard> _hero = [
-    TrumpCard(rank: "", suit: ""),
-    TrumpCard(rank: "", suit: ""),
-  ];
-  String _hero_memo = "";
+  static Post post = Post();
 
-  final List<TrumpCard> _frop = [
-    TrumpCard(rank: "", suit: ""),
-    TrumpCard(rank: "", suit: ""),
-    TrumpCard(rank: "", suit: ""),
-  ];
-  String _frop_memo = "";
+  static bool loading = true;
 
-  TrumpCard _turn = TrumpCard(rank: "", suit: "");
-  String _turn_memo = "";
+  @override
+  void initState() {
+    super.initState();
+    if (widget.mode == 'create') {
+      setState(() {
+        post.load(
+          "",
+          "",
+          "",
+          "",
+          <TrumpCard>[],
+          <TrumpCard>[],
+          TrumpCard(rank: "", suit: ""),
+          TrumpCard(rank: "", suit: ""),
+          "",
+          "",
+          "",
+          "");
+      });
+      post.uid = _uid;
+      post.hero = <TrumpCard>[
+        TrumpCard(rank: "", suit: ""),
+        TrumpCard(rank: "", suit: ""),
+      ];
+      post.frop = <TrumpCard>[
+        TrumpCard(rank: "", suit: ""),
+        TrumpCard(rank: "", suit: ""),
+        TrumpCard(rank: "", suit: ""),
+      ];
 
-  TrumpCard _river = TrumpCard(rank: "", suit: "");
-  String _river_memo = "";
+      setState(() {
+        loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +67,24 @@ class _EditState extends State<Edit> {
         actions: <Widget>[
           IconButton(
             onPressed: () async {
-              await FirestoreService.createPost(Post(_uid, "", _title, _description, _hero, _frop, _turn, _river, _hero_memo, _frop_memo, _turn_memo, _river_memo));
-              Navigator.of(context).pop();
+              if (widget.mode == 'create') {
+                setState(() {
+                  loading = true;
+                });
+                await FirestoreService.createPost(post);
+                setState(() {
+                  loading = false;
+                });
+                await showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const AlertDialog(
+                      title: Text("保存しました"),
+                      actions: [],
+                    );
+                  });
+                Navigator.of(context).pop();
+              }
             },
             icon: const Icon(Icons.check),
           ),
@@ -56,178 +94,281 @@ class _EditState extends State<Edit> {
           icon: Icon(Icons.arrow_back_ios),
         ),
       ),
-      body: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(
-                  children: const [
-                    Text(
-                      'タイトル',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
-                  child: TextField(
-                    maxLines: 3,
-                    minLines: 1,
-                    onChanged: (text) {
-                      setState(() {
-                        _title = text;
-                      });
-                    },
-                  ),
-                ),
-                Row(
-                  children: const [
-                    Text(
-                      '概要',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
-                  child: TextField(
-                    maxLines: 10,
-                    minLines: 1,
-                    onChanged: (text) {
-                      setState(() {
-                        _description = text;
-                      });
-                    },
-                  ),
-                ),
-                Row(
-                  children: const [
-                    Text(
-                      'Your Hand',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 36,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    for (int i = 0; i < _hero.length; ++i)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                        child: GestureDetector(
-                          onTap: () async {
-                            await showDialog(
-                              context: context,
-                              builder: (context) {
-                                return WillPopScope(
-                                  onWillPop: () async {
-                                    setState(() {});
-                                    return true;
-                                  },
-                                  child: AlertDialog(
-                                    title: const Text("カードの種類"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _hero[i] = TrumpCard(rank: "", suit: "");
-                                          });
-                                        },
-                                        child: const Text('クリア')
-                                      )
-                                    ],
-                                    content: SingleChildScrollView(
-                                      child: Column(children: <Widget>[
-                                        Row(children: [
-                                          for (int j = 0; j < suit.length; j++)
-                                            Padding(
-                                              padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                                              child: GestureDetector(
-                                                child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
-                                                onTap: (){
-                                                  setState(() {_hero[i] = TrumpCard(rank: _hero[i].rank, suit: suit[j]);});
-                                                },
-                                              ),
-                                            )
-                                        ],),
-                                        Wrap(children: [
-                                          for (int k = 0; k < ranks.length; k++)
-                                            Padding(
-                                              padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
-                                              child: TextButton(
-                                                child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                                                onPressed: (){
-                                                  setState(() { _hero[i] = TrumpCard(rank: ranks[k], suit: _hero[i].suit);});
-                                                },
-                                              ),
-                                            )
-                                        ],)
-                                    ],) 
-                                  ))
-                                );
-                              });
-                          },
-                          child: _hero[i],
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(
+                    children: const [
+                      Text(
+                        'タイトル',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                  ],),
-                Row(
-                  children: const [
-                    Text(
-                      'メモ',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
-                  child: TextField(
-                    maxLines: 100,
-                    minLines: 1,
-                    onChanged: (text) {
-                      setState(() {
-                        _hero_memo = text;
-                      });
-                    },
+                    ],
                   ),
-                ),
-                
-                Row(
-                  children: const [
-                    Text(
-                      'Frop',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 36,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
+                    child: TextField(
+                      maxLines: 3,
+                      minLines: 1,
+                      onChanged: (text) {
+                        setState(() {
+                          post.title = text;
+                        });
+                      },
                     ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    for (int i = 0; i < _frop.length; ++i)
+                  ),
+                  Row(
+                    children: const [
+                      Text(
+                        '概要',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
+                    child: TextField(
+                      maxLines: 10,
+                      minLines: 1,
+                      onChanged: (text) {
+                        setState(() {
+                          post.description = text;
+                        });
+                      },
+                    ),
+                  ),
+                  Row(
+                    children: const [
+                      Text(
+                        'Your Hand',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 36,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      for (int i = 0; i < post.hero.length; ++i)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
+                          child: GestureDetector(
+                            onTap: () async {
+                              await showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return WillPopScope(
+                                    onWillPop: () async {
+                                      setState(() {});
+                                      return true;
+                                    },
+                                    child: AlertDialog(
+                                      title: const Text("カードの種類"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              post.hero[i] = TrumpCard(rank: "", suit: "");
+                                            });
+                                          },
+                                          child: const Text('クリア')
+                                        )
+                                      ],
+                                      content: SingleChildScrollView(
+                                        child: Column(children: <Widget>[
+                                          Row(children: [
+                                            for (int j = 0; j < suit.length; j++)
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
+                                                child: GestureDetector(
+                                                  child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
+                                                  onTap: (){
+                                                    setState(() {post.hero[i] = TrumpCard(rank: post.hero[i].rank, suit: suit[j]);});
+                                                  },
+                                                ),
+                                              )
+                                          ],),
+                                          Wrap(children: [
+                                            for (int k = 0; k < ranks.length; k++)
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
+                                                child: TextButton(
+                                                  child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                                                  onPressed: (){
+                                                    setState(() {post.hero[i] = TrumpCard(rank: ranks[k], suit: post.hero[i].suit);});
+                                                  },
+                                                ),
+                                              )
+                                          ],)
+                                      ],) 
+                                    ))
+                                  );
+                                });
+                            },
+                            child: post.hero[i],
+                          ),
+                        ),
+                    ],),
+                  Row(
+                    children: const [
+                      Text(
+                        'メモ',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
+                    child: TextField(
+                      maxLines: 100,
+                      minLines: 1,
+                      onChanged: (text) {
+                        setState(() {
+                          post.hero_memo = text;
+                        });
+                      },
+                    ),
+                  ),
+                  
+                  Row(
+                    children: const [
+                      Text(
+                        'Frop',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 36,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      for (int i = 0; i < post.frop.length; ++i)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
+                          child: GestureDetector(
+                            onTap: () async {
+                              await showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return WillPopScope(
+                                    onWillPop: () async {
+                                      setState(() {});
+                                      return true;
+                                    },
+                                    child: AlertDialog(
+                                      title: const Text("カードの種類"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              post.frop[i] = TrumpCard(rank: "", suit: "");
+                                            });
+                                          },
+                                          child: const Text('クリア')
+                                        )
+                                      ],
+                                      content: SingleChildScrollView(
+                                        child: Column(children: <Widget>[
+                                          Row(children: [
+                                            for (int j = 0; j < suit.length; j++)
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
+                                                child: GestureDetector(
+                                                  child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
+                                                  onTap: (){
+                                                    setState(() {post.frop[i] = TrumpCard(rank: post.frop[i].rank, suit: suit[j]);});
+                                                  },
+                                                ),
+                                              )
+                                          ],),
+                                          Wrap(children: [
+                                            for (int k = 0; k < ranks.length; k++)
+                                              Padding(
+                                                padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
+                                                child: TextButton(
+                                                  child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                                                  onPressed: (){
+                                                    setState(() { post.frop[i] = TrumpCard(rank: ranks[k], suit: post.frop[i].suit);});
+                                                  },
+                                                ),
+                                              )
+                                          ],)
+                                      ],) 
+                                    ))
+                                  );
+                                });
+                            },
+                            child: post.frop[i],
+                          ),
+                        )
+                    ],),
+                  Row(
+                    children: const [
+                      Text(
+                        'メモ',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
+                    child: TextField(
+                      maxLines: 100,
+                      minLines: 1,
+                      onChanged: (text) {
+                        setState(() {
+                          post.frop_memo = text;
+                        });
+                      },
+                    ),
+                  ),
+                  
+                  Row(
+                    children: const [
+                      Text(
+                        'Turn',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 36,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
                         child: GestureDetector(
@@ -246,7 +387,7 @@ class _EditState extends State<Edit> {
                                       TextButton(
                                         onPressed: () {
                                           setState(() {
-                                            _frop[i] = TrumpCard(rank: "", suit: "");
+                                            post.turn = TrumpCard(rank: "", suit: "");
                                           });
                                         },
                                         child: const Text('クリア')
@@ -261,7 +402,7 @@ class _EditState extends State<Edit> {
                                               child: GestureDetector(
                                                 child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
                                                 onTap: (){
-                                                  setState(() {_frop[i] = TrumpCard(rank: _frop[i].rank, suit: suit[j]);});
+                                                  setState(() {post.turn = TrumpCard(rank: post.turn.rank, suit: suit[j]);});
                                                 },
                                               ),
                                             )
@@ -273,7 +414,7 @@ class _EditState extends State<Edit> {
                                               child: TextButton(
                                                 child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                                                 onPressed: (){
-                                                  setState(() { _frop[i] = TrumpCard(rank: ranks[k], suit: _frop[i].suit);});
+                                                  setState(() { post.turn = TrumpCard(rank: ranks[k], suit: post.turn.suit);});
                                                 },
                                               ),
                                             )
@@ -283,238 +424,142 @@ class _EditState extends State<Edit> {
                                 );
                               });
                           },
-                          child: _frop[i],
+                          child: post.turn,
                         ),
                       )
-                  ],),
-                Row(
-                  children: const [
-                    Text(
-                      'メモ',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
+                    ],),
+                  Row(
+                    children: const [
+                      Text(
+                        'メモ',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
-                  child: TextField(
-                    maxLines: 100,
-                    minLines: 1,
-                    onChanged: (text) {
-                      setState(() {
-                        _frop_memo = text;
-                      });
-                    },
+                    ],
                   ),
-                ),
-                
-                Row(
-                  children: const [
-                    Text(
-                      'Turn',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 36,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
+                    child: TextField(
+                      maxLines: 100,
+                      minLines: 1,
+                      onChanged: (text) {
+                        setState(() {
+                          post.turn_memo = text;
+                        });
+                      },
                     ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                      child: GestureDetector(
-                        onTap: () async {
-                          await showDialog(
-                            context: context,
-                            builder: (context) {
-                              return WillPopScope(
-                                onWillPop: () async {
-                                  setState(() {});
-                                  return true;
-                                },
-                                child: AlertDialog(
-                                  title: const Text("カードの種類"),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _turn = TrumpCard(rank: "", suit: "");
-                                        });
-                                      },
-                                      child: const Text('クリア')
-                                    )
-                                  ],
-                                  content: SingleChildScrollView(
-                                    child: Column(children: <Widget>[
-                                      Row(children: [
-                                        for (int j = 0; j < suit.length; j++)
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                                            child: GestureDetector(
-                                              child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
-                                              onTap: (){
-                                                setState(() {_turn = TrumpCard(rank: _turn.rank, suit: suit[j]);});
-                                              },
-                                            ),
-                                          )
-                                      ],),
-                                      Wrap(children: [
-                                        for (int k = 0; k < ranks.length; k++)
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
-                                            child: TextButton(
-                                              child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                                              onPressed: (){
-                                                setState(() { _turn = TrumpCard(rank: ranks[k], suit: _turn.suit);});
-                                              },
-                                            ),
-                                          )
-                                      ],)
-                                  ],) 
-                                ))
-                              );
-                            });
-                        },
-                        child: _turn,
-                      ),
-                    )
-                  ],),
-                Row(
-                  children: const [
-                    Text(
-                      'メモ',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
-                  child: TextField(
-                    maxLines: 100,
-                    minLines: 1,
-                    onChanged: (text) {
-                      setState(() {
-                        _turn_memo = text;
-                      });
-                    },
                   ),
-                ),
 
-                Row(
-                  children: const [
-                    Text(
-                      'River',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 36,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    children: const [
+                      Text(
+                        'River',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 36,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                      child: GestureDetector(
-                        onTap: () async {
-                           await showDialog(
-                            context: context,
-                            builder: (context) {
-                              return WillPopScope(
-                                onWillPop: () async {
-                                  setState(() {});
-                                  return true;
-                                },
-                                child: AlertDialog(
-                                  title: const Text("カードの種類"),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _river = TrumpCard(rank: "", suit: "");
-                                        });
-                                      },
-                                      child: const Text('クリア')
-                                    )
-                                  ],
-                                  content: SingleChildScrollView(
-                                    child: Column(children: <Widget>[
-                                      Row(children: [
-                                        for (int j = 0; j < suit.length; j++)
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
-                                            child: GestureDetector(
-                                              child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
-                                              onTap: (){
-                                                setState(() {_river = TrumpCard(rank: _river.rank, suit: suit[j]);});
-                                              },
-                                            ),
-                                          )
-                                      ],),
-                                      Wrap(children: [
-                                        for (int k = 0; k < ranks.length; k++)
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
-                                            child: TextButton(
-                                              child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                                              onPressed: (){
-                                                setState(() { _river = TrumpCard(rank: ranks[k], suit: _river.suit);});
-                                              },
-                                            ),
-                                          )
-                                      ],)
-                                  ],) 
-                                ))
-                              );
-                            });
-                        },
-                        child: _river,
-                      ),
-                    )
-                  ],),
-                Row(
-                  children: const [
-                    Text(
-                      'メモ',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
-                  child: TextField(
-                    maxLines: 100,
-                    minLines: 1,
-                    onChanged: (text) {
-                      setState(() {
-                        _river_memo = text;
-                      });
-                    },
+                    ],
                   ),
-                ),
-              ],
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
+                        child: GestureDetector(
+                          onTap: () async {
+                            await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return WillPopScope(
+                                  onWillPop: () async {
+                                    setState(() {});
+                                    return true;
+                                  },
+                                  child: AlertDialog(
+                                    title: const Text("カードの種類"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            post.river = TrumpCard(rank: "", suit: "");
+                                          });
+                                        },
+                                        child: const Text('クリア')
+                                      )
+                                    ],
+                                    content: SingleChildScrollView(
+                                      child: Column(children: <Widget>[
+                                        Row(children: [
+                                          for (int j = 0; j < suit.length; j++)
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 10.0, top: 10.0, left: 10.0, right: 10.0),
+                                              child: GestureDetector(
+                                                child: Image.asset('assets/card1/${suit[j]}.png', height: 50, width: 50,),
+                                                onTap: (){
+                                                  setState(() {post.river = TrumpCard(rank: post.river.rank, suit: suit[j]);});
+                                                },
+                                              ),
+                                            )
+                                        ],),
+                                        Wrap(children: [
+                                          for (int k = 0; k < ranks.length; k++)
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 0.0, top: 0.0, left: 0.0, right: 0.0),
+                                              child: TextButton(
+                                                child: Text(ranks[k], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                                                onPressed: (){
+                                                  setState(() { post.river = TrumpCard(rank: ranks[k], suit: post.river.suit);});
+                                                },
+                                              ),
+                                            )
+                                        ],)
+                                    ],) 
+                                  ))
+                                );
+                              });
+                          },
+                          child: post.river,
+                        ),
+                      )
+                    ],),
+                  Row(
+                    children: const [
+                      Text(
+                        'メモ',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0, top: 0.0, left: 0.0, right: 0.0),
+                    child: TextField(
+                      maxLines: 100,
+                      minLines: 1,
+                      onChanged: (text) {
+                        setState(() {
+                          post.river_memo = text;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              )
             )
-          )
-    ));
+          ),
+          OverlayLoadingMolecules(visible: loading),
+        ],
+        )
+      );
   }
 }
